@@ -1,0 +1,6 @@
+import type {State} from './storage';
+import {initial,validate} from './storage';
+export type ShareChoice={active:boolean;progress:boolean;open:boolean;positions:string[];days:string[];savings:string[]};
+export const noShare=():ShareChoice=>({active:false,progress:false,open:false,positions:[],days:[],savings:[]});
+export function snapshot(state:State,choice:ShareChoice){return {version:1,done:choice.progress?state.done:[],positions:state.positions.filter(p=>p.sale?choice.positions.includes(p.id):choice.open).map(p=>({...p,note:''})),days:state.calendar.filter(e=>choice.days.includes(e.id)).map(e=>({...e,note:''})),savings:state.savings.filter(p=>choice.savings.includes(p.id))};}
+export function parseSnapshot(raw:unknown){if(!raw||typeof raw!=='object')throw Error('Ungültige Freigabe.');const data=raw as ReturnType<typeof snapshot>;if(data.version!==1||!Array.isArray(data.done)||!Array.isArray(data.positions)||!Array.isArray(data.days)||!Array.isArray(data.savings))throw Error('Ungültige Freigabe.');const checked=validate({...initial(),done:data.done,positions:data.positions,calendar:data.days,savings:data.savings});return {version:1,done:checked.done,positions:checked.positions,days:checked.calendar,savings:checked.savings};}
