@@ -45,3 +45,12 @@ Version 1.0.0 am 12.10.2026 veröffentlicht: https://github.com/RyZEeeeeeeeeee/k
 
 41 Unit-Tests und 12 Chromium-Browsertests bestanden. ETF-Sparplan, Kauf, Bestandsrechnung, Reload und Importkompatibilität geprüft. Freundes-Client mit simuliertem Backend geprüft: Anmeldung, keine Veröffentlichung vor Aktivierung, Auswahl und Widerruf. Datenschutz-Filter und öffentliche Schlüsselvalidierung getestet. Supabase-Schema samt RLS vorbereitet, aber noch nicht auf einem realen Projekt ausgeführt oder mit mehreren echten Konten geprüft. Electron-Start mit gebündelten Dateien erfolgreich. Windows-Build vorbereitet.
 
+
+Version 1.1.0 veröffentlicht: GitHub-Actions-Lauf 38305723854 erfolgreich, Windows-x64-EXE sowie Intel- und Apple-Silicon-DMGs erstellt. 41 Tests auf allen drei Buildsystemen erfolgreich. Release-API bestätigt alle drei Downloads. SQL-Syntax mit PostgreSQL-Parser geprüft (27 Statements); keine Live-Prüfung der Supabase-RLS ohne eingerichtetes Projekt. Browser-Szenarien 12 erfolgreich einschließlich simuliertem Freundes-Backend.
+
+
+## Supabase-Verbindung 1.1.1
+
+Gemeinsame Projektadresse und öffentlicher Publishable-Key hinterlegt. Auth-Settings erreichbar: E-Mail aktiv, Registrierung erlaubt, E-Mail-Bestätigung erforderlich. Tabellen für Freunde, Freigaben und Kommentare vorhanden. Anonymer Zugriff auf Freundestabelle abgewiesen; Freigaben und Kommentare liefern anonym keine Zeilen. Keine echten Konten erstellt und keine End-to-End-Freigabe zwischen zwei echten Konten geprüft. 41 Unit-Tests und 12 Browsertests bestehen.
+
+
