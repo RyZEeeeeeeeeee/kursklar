@@ -1,6 +1,6 @@
 # Kostenlosen Freundesbereich einrichten
 
-Das Backend ist vorbereitet, aber es wurde noch kein Supabase-Projekt in deinem Namen erstellt. Ohne diesen Schritt sind Freunde, Kommentare und Online-Freigaben nicht live. Die ETF-Verwaltung funktioniert unabhängig davon lokal.
+Das gemeinsame Supabase-Projekt ist in Version 1.1.1 hinterlegt. Projektzugang, E-Mail-Anmeldung und vorhandene Tabellen wurden geprüft. Neue Konten müssen ihre E-Mail bestätigen. Du und dein Freund registrieren euch jeweils unter Freunde; anschließend Freundescodes austauschen und die Anfrage annehmen. Die Einrichtungsschritte unten sind nur für ein neues Projekt erforderlich. Das SQL-Skript nicht erneut ausführen, wenn die Tabellen schon angelegt wurden. Die vollständige Anmeldung und Freigabe mit zwei echten Konten ist noch nicht geprüft.
 
 1. Auf https://supabase.com/dashboard mit deinem GitHub-Konto anmelden.
 2. Eine kostenlose Organisation und ein Projekt **kursklar** anlegen, möglichst mit europäischer Region. Das Datenbankpasswort im eigenen Passwortmanager speichern; hier nicht teilen.
@@ -25,3 +25,5 @@ Sparpläne sind manuelle Aufzeichnungen. Geplante Sparraten werden nie automatis
 Mit zwei Testkonten anmelden und mindestens prüfen: Anfrage vor Annahme nicht nutzbar, nur ausgewählte Daten sichtbar, keine privaten Notizen, Aktualisierung nach neuem offenen Trade, Widerruf, Aufgaben/Kommentare und entferntes Freundeskonto. Zusätzlich mit einem dritten Konto Zugriffe auf fremde Freigaben verifizieren. SQL-Skript und Client sind lokal vorbereitet; diese Backend-Prüfung kann erst im echten Projekt erfolgen.
 
 Die kostenlose Supabase-Stufe hat Nutzungslimits; inaktive Free-Projekte können pausiert werden. Es wurde kein kostenpflichtiger Tarif gebucht. Siehe https://supabase.com/docs/guides/platform/free-project-pausing .
+
+
