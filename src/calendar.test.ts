@@ -1,0 +1,8 @@
+import {it,expect} from 'vitest';
+import {monthCells,validDate,moneyInput,totals,saveEntry,type CalendarEntry} from './calendar';
+import {initial,validate} from './storage';
+const entry=(over:Partial<CalendarEntry>={}):CalendarEntry=>({id:'a',date:'2026-10-12',kind:'trade',symbol:'Nordlicht',time:'09:00',direction:'Kauf',gross:10000,fees:200,note:'Plan eingehalten',...over});
+it('Kalender beginnt Montag und behandelt Schaltjahre',()=>{expect(monthCells(2026,9)[0].date).toBe('2026-09-28');expect(monthCells(2024,1).filter(c=>c.inMonth)).toHaveLength(29);expect(validDate('2026-02-29')).toBe(false);expect(validDate('2024-02-29')).toBe(true);});
+it('Centbeträge und Nettoergebnisse bleiben exakt',()=>{expect(moneyInput('-25,50')).toBe(-2550);expect(moneyInput('0.01')).toBe(1);for(const s of ['','abc','1.234','Infinity'])expect(()=>moneyInput(s)).toThrow();expect(totals([entry(),entry({id:'b',gross:-5000,fees:100})]).net).toBe(4700);});
+it('Tagesergebnisse und Einzeltrades werden nicht doppelt gezählt',()=>{expect(()=>saveEntry([entry()],entry({id:'b',kind:'day',fees:0}))).toThrow(/bereits/);expect(()=>saveEntry([entry({kind:'day',fees:0})],entry({id:'b'}))).toThrow();expect(saveEntry([entry()],entry({gross:2000}))).toHaveLength(1);});
+it('alte Speicherstände werden ergänzt; neue Einträge exportiert und geprüft',()=>{const s=initial();const {calendar:_,...old}=s;expect(validate(old).calendar).toEqual([]);s.calendar=[entry()];expect(validate(JSON.parse(JSON.stringify(s))).calendar).toEqual(s.calendar);expect(()=>validate({...s,calendar:[entry(),entry()]})).toThrow();expect(()=>validate({...s,calendar:[entry({date:'2026-02-31'})]})).toThrow();});
