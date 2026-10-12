@@ -35,3 +35,13 @@ Desktop-Hülle mit isolierter Renderer-Umgebung, lokaler App-Adresse, Versionsve
 
 Electron-Smoke-Test unter Windows anschließend bestanden: lokale Assets, Startbildschirm, Desktop-API (Version 1.0.0) und Kalender. Der Download der Electron-Laufzeit gelang im zweiten Versuch. Kein Mac-Build oder Live-Release bestätigt.
 
+
+## Erste Mac-Veröffentlichung
+
+Version 1.0.0 am 12.10.2026 veröffentlicht: https://github.com/RyZEeeeeeeeeee/kursklar/releases/tag/v1.0.0 . GitHub-Actions-Lauf 38303817048 erfolgreich: macos-15 (arm64), macos-15-intel (x64), beide mit npm ci, 36 Tests, Produktionsbuild und DMG-Packaging. Gemeinsame Release erfolgreich, beide Downloads in der öffentlichen Release-API geprüft. Installation und Gatekeeper-Verhalten auf dem Mac eines Nutzers noch nicht getestet.
+
+
+## ETF und Freundesbereich 1.1.0
+
+41 Unit-Tests und 12 Chromium-Browsertests bestanden. ETF-Sparplan, Kauf, Bestandsrechnung, Reload und Importkompatibilität geprüft. Freundes-Client mit simuliertem Backend geprüft: Anmeldung, keine Veröffentlichung vor Aktivierung, Auswahl und Widerruf. Datenschutz-Filter und öffentliche Schlüsselvalidierung getestet. Supabase-Schema samt RLS vorbereitet, aber noch nicht auf einem realen Projekt ausgeführt oder mit mehreren echten Konten geprüft. Electron-Start mit gebündelten Dateien erfolgreich. Windows-Build vorbereitet.
+
