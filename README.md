@@ -51,3 +51,7 @@ Neue Trades werden mit Stückzahl (bis 6 Nachkommastellen), Kaufdatum/-uhrzeit, 
 Neue Kalender-Trades rechnen ausschließlich Verkaufsgutschrift minus Kaufabbuchung. Beide Beträge werden inklusive bereits verrechneter Gebühren eingetragen. Stückzahl und Einzelpreise dienen nur der Dokumentation; Gebühren werden nicht zusätzlich abgezogen. Ältere Positionen behalten ihre bisherige Berechnung und sind gekennzeichnet. Beim Bearbeiten müssen die tatsächlichen Cash-Beträge ergänzt werden; es erfolgt keine automatische Umdeutung der alten Gebührenfelder.
 
 
+## ETF-Sparpläne und Freunde
+
+ETF-Sparpläne und tatsächliche Käufe unter Meine ETF-Sparpläne erfassen. Freunde können nach ausdrücklicher Freigabe Lernfortschritt, ausgewählte Trades, offene Positionen und ausgewählte ETFs sehen. Gemeinsame Aufgaben und Kommentare sind vorbereitet. Für den Onlinebetrieb zuerst das kostenlose Supabase-Projekt gemäß backend/README.md einrichten; ohne Projekt sind diese Funktionen nicht live. Die Anmeldung betrifft nur den Freundesbereich. Windows-Datei: portable EXE; keine Installation nötig. Die App enthält keine persönlichen Einträge. Beide Plattformen erhalten passende Update-Downloads.
+
