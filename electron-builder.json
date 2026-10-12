@@ -4,6 +4,7 @@
  "directories":{"output":"release"},
  "files":["dist/**/*","desktop/**/*","package.json"],
  "mac":{"target":"dmg","category":"public.app-category.education","identity":null},
+ "win":{"target":"portable"},
  "artifactName":"Kursklar-${version}-${arch}.${ext}",
  "publish":null
 }
