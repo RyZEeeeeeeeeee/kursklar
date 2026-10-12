@@ -1,0 +1,5 @@
+import {createRequire} from 'node:module';
+import {it,expect} from 'vitest';
+const {compare,releaseInfo,validRepo}=createRequire(import.meta.url)('../desktop/update.cjs');
+it('Versionsvergleich ist numerisch',()=>{expect(compare('v1.10.0','1.9.0')).toBe(1);expect(compare('1.0.0','1.0.0')).toBe(0);expect(()=>compare('oops','1.0.0')).toThrow();});
+it('Update benötigt passende Architektur und vertrauenswürdigen Download',()=>{const r={tag_name:'v1.1.0',assets:[{name:'Kursklar-1.1.0-arm64.dmg',browser_download_url:'https://github.com/test/kursklar/releases/download/v1.1.0/app.dmg'}]};expect(releaseInfo(r,'1.0.0','test/kursklar','arm64').status).toBe('available');expect(releaseInfo(r,'1.0.0','test/kursklar','x64').status).toBe('error');expect(()=>releaseInfo({...r,assets:[{...r.assets[0],browser_download_url:'https://evil.example/app.dmg'}]},'1.0.0','test/kursklar','arm64')).toThrow();expect(validRepo('../bad')).toBe(false);});
