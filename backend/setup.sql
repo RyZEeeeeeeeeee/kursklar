@@ -1,0 +1,28 @@
+-- Einmal im SQL-Editor des eigenen Supabase-Projekts ausführen.
+create table public.kursklar_friends(id uuid primary key default gen_random_uuid(), owner uuid not null references auth.users(id) on delete cascade, peer uuid not null references auth.users(id) on delete cascade, accepted boolean not null default false, check(owner<>peer));
+create unique index kursklar_friend_pair on public.kursklar_friends(least(owner,peer),greatest(owner,peer));
+alter table public.kursklar_friends enable row level security;
+create policy friend_read on public.kursklar_friends for select to authenticated using(auth.uid()=owner or auth.uid()=peer);
+create function public.kursklar_connected(a uuid,b uuid) returns boolean language sql stable security definer set search_path=public,pg_temp as $$ select auth.uid() in(a,b) and exists(select 1 from kursklar_friends where accepted and ((owner=a and peer=b) or (owner=b and peer=a))) $$;
+create function public.kursklar_request_friend(friend_code uuid) returns void language plpgsql security definer set search_path=public,pg_temp as $$ begin if auth.uid() is null or auth.uid()=friend_code then raise exception 'Ungültiger Freundescode'; end if; insert into kursklar_friends(owner,peer) values(auth.uid(),friend_code) on conflict do nothing; end $$;
+create function public.kursklar_accept_friend(request_id uuid) returns void language sql security definer set search_path=public,pg_temp as $$ update kursklar_friends set accepted=true where id=request_id and peer=auth.uid() $$;
+create table public.kursklar_shares(owner uuid not null references auth.users(id) on delete cascade, peer uuid not null references auth.users(id) on delete cascade, data jsonb not null check(octet_length(data::text)<1000000), updated_at timestamptz not null default now(), primary key(owner,peer));
+alter table public.kursklar_shares enable row level security;
+create policy share_read on public.kursklar_shares for select to authenticated using(owner=auth.uid() or (peer=auth.uid() and kursklar_connected(owner,peer)));
+create policy share_write on public.kursklar_shares for insert to authenticated with check(owner=auth.uid() and kursklar_connected(owner,peer));
+create policy share_update on public.kursklar_shares for update to authenticated using(owner=auth.uid()) with check(owner=auth.uid() and kursklar_connected(owner,peer));
+create policy share_delete on public.kursklar_shares for delete to authenticated using(owner=auth.uid());
+create table public.kursklar_posts(id uuid primary key default gen_random_uuid(),owner uuid not null references auth.users(id) on delete cascade,peer uuid not null references auth.users(id) on delete cascade,kind text not null check(kind in('task','comment')),body text not null check(length(body) between 1 and 4000),done boolean not null default false,created_at timestamptz not null default now());
+alter table public.kursklar_posts enable row level security;
+create policy post_read on public.kursklar_posts for select to authenticated using(kursklar_connected(owner,peer));
+create policy post_insert on public.kursklar_posts for insert to authenticated with check(owner=auth.uid() and kursklar_connected(owner,peer));
+create policy post_update on public.kursklar_posts for update to authenticated using(kursklar_connected(owner,peer)) with check(kursklar_connected(owner,peer));
+create policy post_delete on public.kursklar_posts for delete to authenticated using(owner=auth.uid());
+create function public.kursklar_immutable_participants() returns trigger language plpgsql as $$ begin if new.owner<>old.owner or new.peer<>old.peer or new.id<>old.id then raise exception 'Teilnehmer dürfen nicht geändert werden';end if;if auth.uid()<>old.owner and (new.body<>old.body or new.kind<>old.kind or new.created_at<>old.created_at or old.kind<>'task') then raise exception 'Nur der Autor darf Inhalte bearbeiten';end if;return new;end $$;
+create trigger post_participants before update on public.kursklar_posts for each row execute function public.kursklar_immutable_participants();
+create function public.kursklar_remove_friend(request_id uuid) returns void language plpgsql security definer set search_path=public,pg_temp as $$ declare f kursklar_friends;begin select * into f from kursklar_friends where id=request_id and auth.uid() in(owner,peer);if f.id is null then return;end if;delete from kursklar_shares where (owner=f.owner and peer=f.peer) or(owner=f.peer and peer=f.owner);delete from kursklar_posts where (owner=f.owner and peer=f.peer) or(owner=f.peer and peer=f.owner);delete from kursklar_friends where id=f.id;end $$;
+revoke all on public.kursklar_friends from anon,authenticated;
+grant select on public.kursklar_friends to authenticated;
+revoke all on function public.kursklar_connected(uuid,uuid), public.kursklar_request_friend(uuid),public.kursklar_accept_friend(uuid),public.kursklar_remove_friend(uuid) from public,anon;
+grant execute on function public.kursklar_connected(uuid,uuid),public.kursklar_request_friend(uuid),public.kursklar_accept_friend(uuid),public.kursklar_remove_friend(uuid) to authenticated;
+grant select,insert,update,delete on public.kursklar_shares,public.kursklar_posts to authenticated;
