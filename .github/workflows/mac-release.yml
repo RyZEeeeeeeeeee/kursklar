@@ -1,0 +1,66 @@
+name: Mac-App bauen
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+          - runner: macos-15
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Versionsnummer prüfen
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node -e "if(process.env.RELEASE_TAG !== 'v'+require('./package.json').version) throw Error('Git-Tag und package.json-Version müssen übereinstimmen')"
+      - run: npm test
+      - run: npm run build
+      - name: Update-Repository eintragen
+        env:
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: node -e "require('fs').writeFileSync('desktop/release-config.json', JSON.stringify({repository:process.env.RELEASE_REPOSITORY}))"
+      - run: npx electron-builder --mac --${{ matrix.arch }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kursklar-Mac-${{ matrix.arch }}
+          path: release/*.dmg
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Kursklar-Mac-*
+          path: release
+          merge-multiple: true
+      - name: Beide Mac-Dateien veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          TAG="v$(node -p "require('./package.json').version")"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Version $TAG ist bereits veröffentlicht. Für neue Updates Versionsnummer erhöhen."
+            exit 0
+          fi
+          gh release create "$TAG" release/*.dmg --target "$RELEASE_COMMIT" --title "Kursklar $TAG" --notes "Mac-App für Intel und Apple Silicon. Die passende DMG öffnen und Kursklar nach Programme kopieren. Unsigned: macOS kann einen Sicherheitshinweis anzeigen. Updates werden heruntergeladen und die App manuell ersetzt; Einträge bleiben lokal im Benutzerprofil."
+
