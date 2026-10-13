@@ -4,15 +4,16 @@ import { lessons } from './content';
 import { validDate } from './calendar';
 import { checkPosition } from './positions';
 import { savingSchema } from './savings';
+import {profileSchema} from './profile';
 const integer = z.number().int().safe();
 const nonnegative = integer.nonnegative();
 const order = z.object({ id: z.string().min(1), side: z.enum(['buy', 'sell']), kind: z.enum(['Market', 'Limit', 'Stop', 'Stop-Limit']), qty: integer.positive().max(100000), limit: nonnegative, stop: nonnegative, expires: nonnegative, status: z.enum(['offen', 'ausgelöst', 'ausgeführt', 'storniert', 'abgelaufen']), reserve: nonnegative, price: integer.positive().optional(), note: z.string().max(2000) });
 const trade = z.object({ id: z.string(), side: z.enum(['buy', 'sell']), qty: integer.positive(), price: integer.positive(), fee: nonnegative, basis: nonnegative, realized: integer, time: z.string() });
 const calendarEntry = z.object({ id:z.string().min(1), date:z.string().refine(validDate), kind:z.enum(['trade','day']), symbol:z.string().max(100), time:z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/), direction:z.enum(['Kauf','Verkauf']), gross:integer.min(-100000000).max(100000000), fees:nonnegative.max(100000000), note:z.string().max(10000) });
 const positionSchema=z.object({id:z.string().min(1),symbol:z.string().max(100),qty:z.number().positive().max(1000000),buyDate:z.string(),buyTime:z.string(),buyPrice:integer.positive().max(100000000),buyFee:nonnegative.max(100000000),buyCash:nonnegative.max(10000000000).optional(),note:z.string().max(10000),sale:z.object({date:z.string(),time:z.string(),price:integer.positive().max(100000000),fee:nonnegative.max(100000000),cash:nonnegative.max(10000000000).optional()}).optional()});
-const schema = z.object({ version: z.literal(1), savings:z.array(savingSchema).max(1000).default([]), positions:z.array(positionSchema).max(10000).default([]), calendar:z.array(calendarEntry).max(10000).default([]), done: z.array(z.string()).max(100), portfolio: z.object({ cash: nonnegative, qty: nonnegative, basis: nonnegative, realized: integer, fees: nonnegative, orders: z.array(order).max(5000), trades: z.array(trade).max(5000) }), journal: z.array(z.object({ id: z.string(), date: z.string(), fields: z.array(z.string().max(10000)).length(8) })).max(1000), research: z.array(z.boolean()).length(8), thesis: z.array(z.string().max(10000)).length(4), market: z.object({ scenario: integer.min(0).max(6), step: integer.min(0).max(8) }) });
+const schema = z.object({ version: z.literal(1), profile:profileSchema.default({name:'',avatar:'🌌'}), savings:z.array(savingSchema).max(1000).default([]), positions:z.array(positionSchema).max(10000).default([]), calendar:z.array(calendarEntry).max(10000).default([]), done: z.array(z.string()).max(100), portfolio: z.object({ cash: nonnegative, qty: nonnegative, basis: nonnegative, realized: integer, fees: nonnegative, orders: z.array(order).max(5000), trades: z.array(trade).max(5000) }), journal: z.array(z.object({ id: z.string(), date: z.string(), fields: z.array(z.string().max(10000)).length(8) })).max(1000), research: z.array(z.boolean()).length(8), thesis: z.array(z.string().max(10000)).length(4), market: z.object({ scenario: integer.min(0).max(6), step: integer.min(0).max(8) }) });
 export type State = z.infer<typeof schema>;
-export const initial = (): State => ({ version: 1, savings:[], positions:[], calendar:[], done: [], portfolio: fresh(), journal: [], research: Array(8).fill(false), thesis: ['', '', '', ''], market: { scenario: 0, step: 0 } });
+export const initial = (): State => ({ version: 1, profile:{name:'',avatar:'🌌'}, savings:[], positions:[], calendar:[], done: [], portfolio: fresh(), journal: [], research: Array(8).fill(false), thesis: ['', '', '', ''], market: { scenario: 0, step: 0 } });
 export function validate(raw: unknown): State {
   const s = schema.parse(raw);
   if(new Set(s.savings.map(p=>p.id)).size!==s.savings.length||s.savings.some(p=>new Set(p.buys.map(b=>b.id)).size!==p.buys.length))throw Error('Doppelte ETF-Einträge.');
@@ -46,6 +47,3 @@ export function read(): { state: State; warning: string } {
   try { const raw = localStorage.getItem(KEY); return { state: raw ? validate(JSON.parse(raw)) : initial(), warning: '' }; }
   catch { return { state: initial(), warning: 'Die lokalen Daten konnten nicht gelesen werden. Es wurde ein neuer Stand geladen. Ein vorhandener Export kann importiert werden.' }; }
 }
-
-
-
