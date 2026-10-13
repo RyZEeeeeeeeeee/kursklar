@@ -1,0 +1,7 @@
+import {z} from 'zod';
+import type {State} from './storage';
+import {purchaseValue,result} from './positions';
+import {savingTotals} from './savings';
+export const avatars=['🌌','🦊','🐻','🐼','🚀','🌱','🦉','🐧'];
+export const profileSchema=z.object({name:z.string().max(40),avatar:z.string().refine(s=>avatars.includes(s)||/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s)).refine(s=>s.length<=350000)});
+export function profileStats(s:State){const closed=s.positions.filter(p=>p.sale);const manual=s.calendar.filter(e=>e.kind==='trade');const amounts=closed.map(p=>result(p)!.net).concat(manual.map(e=>e.gross-e.fees));const invested=s.positions.reduce((n,p)=>n+(p.buyCash??purchaseValue(p)+p.buyFee),0);const open=s.positions.filter(p=>!p.sale).reduce((n,p)=>n+(p.buyCash??purchaseValue(p)+p.buyFee),0);const etf=s.savings.reduce((n,p)=>n+savingTotals(p).cash,0);return {trades:s.positions.length+manual.length,closed:closed.length+manual.length,openCount:s.positions.filter(p=>!p.sale).length,invested,open,etf,realized:amounts.reduce((n,x)=>n+x,0)+s.calendar.filter(e=>e.kind==='day').reduce((n,e)=>n+e.gross-e.fees,0),wins:amounts.filter(x=>x>0).length,losses:amounts.filter(x=>x<0).length,days:new Set([...s.positions.map(p=>p.buyDate),...s.calendar.map(e=>e.date)]).size};}
