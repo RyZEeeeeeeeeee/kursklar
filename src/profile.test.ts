@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest';
+import {initial,validate} from './storage';
+import {profileStats} from './profile';
+it('Profilstatistik trennt offene Positionen und realisierte Cash-Ergebnisse',()=>{const s=initial();s.positions=[{id:'p',symbol:'Test',qty:4,buyDate:'2026-10-12',buyTime:'09:00',buyPrice:4530,buyFee:0,buyCash:18220,note:'',sale:{date:'2026-10-13',time:'09:00',price:4990,fee:0,cash:19560}},{id:'o',symbol:'Offen',qty:1,buyDate:'2026-10-13',buyTime:'10:00',buyPrice:1000,buyFee:0,buyCash:1000,note:''}];expect(profileStats(s)).toMatchObject({trades:2,closed:1,openCount:1,invested:19220,open:1000,realized:1340,wins:1,losses:0});const {profile:_,...old}=s;expect(validate(old).profile.avatar).toBe('🌌');});
